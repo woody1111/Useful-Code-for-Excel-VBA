@@ -1,0 +1,45 @@
+Function first_entry(Sheetname As String, i, start, Optional direction As String = "r", Optional key As String = "value") As Variant
+    Dim collect As Collection
+    Set collect = New Collection
+    Dim sheet As Worksheet
+    If Sheetname = "-" Then
+        Set sheet = ActiveSheet
+    Else
+        Set sheet = ThisWorkbook.Sheets(Sheetname)
+    End If
+    
+    If direction = "r" Then
+        c = start
+        If sheet.Cells(i, c) <> "" Then
+            collect.Add c, "col"
+            collect.Add sheet.Cells(i, c), "value"
+        Else
+            Do While sheet.Cells(i, c) = ""
+                c = c + 1
+                If c > sheet.UsedRange.Columns.Count Then
+                    c = start
+                    Exit Do
+                End If
+            Loop
+            collect.Add c, "col"
+            collect.Add sheet.Cells(i, c), "value"
+        End If
+    Else
+        r = start
+        If sheet.Cells(r, i) <> "" Then
+            collect.Add r, "row"
+            collect.Add sheet.Cells(r, i), "value"
+        Else
+            Do While sheet.Cells(r, i) = ""
+                r = r + 1
+                If r > sheet.UsedRange.Rows.Count Then
+                    r = start
+                    Exit Do
+                End If
+            Loop
+            collect.Add r, "row"
+            collect.Add sheet.Cells(r, i), "value"
+        End If
+    End If
+    first_entry = collect.Item(key)
+End Function
