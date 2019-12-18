@@ -1,0 +1,13 @@
+Function ifbez(val1, Optional val2 As Variant = "-", Optional mode As String = "bezs") As Variant
+    If IsError(val1) And InStr(mode, "e") <> 0 Then
+        ifbez = val2
+    ElseIf val1 = "" And InStr(mode, "b") <> 0 Then
+        ifbez = val2
+    ElseIf val1 = 0 And InStr(mode, "z") <> 0 Then
+        ifbez = val2
+    ElseIf Replace(val1, " ", "") = "" And InStr(mode, "s") <> 0 Then
+        ifbez = val2
+    Else
+        ifbez = val1
+    End If
+End Function
