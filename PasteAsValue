@@ -1,0 +1,10 @@
+Sub PasteAsValue()
+' Keyboard Shortcut: Ctrl+w
+    For Each i In Selection
+        If i.value = "" Then
+            i.Clear
+        Else
+            i.value = i.value
+        End If
+    Next
+End Sub
