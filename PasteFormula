@@ -1,0 +1,5 @@
+Sub PasteFormula()
+' Keyboard Shortcut: Ctrl+Shift+V
+    Selection.PasteSpecial Paste:=xlPasteFormulas, Operation:=xlNone, _
+        SkipBlanks:=False, Transpose:=False
+End Sub
