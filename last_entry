@@ -1,0 +1,53 @@
+Function last_entry(Sheetname As String, i, Optional start As Integer = 1, Optional term As Integer = -1, Optional direction As String = "r", Optional key As String = "value") As Variant
+    Dim collect As Collection
+    Set collect = New Collection
+    Dim sheet As Worksheet
+    
+    If Sheetname = "-" Then
+        Set sheet = ActiveSheet
+    Else
+        Set sheet = ThisWorkbook.Sheets(Sheetname)
+    End If
+    If direction = "r" Then
+        If term = -1 Then
+            c = sheet.UsedRange.Columns.Count
+        Else
+            c = term
+        End If
+        If sheet.Cells(i, c) <> "" Then
+            collect.Add c, "col"
+            collect.Add sheet.Cells(i, c), "value"
+        Else
+            Do While sheet.Cells(i, c) = ""
+                c = c - 1
+                If c <= start Then
+                    c = start
+                    Exit Do
+                End If
+            Loop
+            collect.Add c, "col"
+            collect.Add sheet.Cells(i, c), "value"
+        End If
+    Else
+        If term = -1 Then
+            r = sheet.UsedRange.Rows.Count
+        Else
+            r = term
+        End If
+        If sheet.Cells(r, i) <> "" Then
+            collect.Add r, "row"
+            collect.Add sheet.Cells(r, i), "value"
+        Else
+            Do While sheet.Cells(r, i) = ""
+                r = r - 1
+                If r <= start Then
+                    r = start
+                    Exit Do
+                End If
+            Loop
+            collect.Add r, "row"
+            collect.Add sheet.Cells(r, i), "value"
+        End If
+    End If
+    last_entry = collect.Item(key)
+End Function
