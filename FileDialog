@@ -1,0 +1,31 @@
+Function SelectExcel() As Object
+    Set SelectExcel = New Collection
+    Dim fDialog As FileDialog
+    Set fDialog = Application.FileDialog(msoFileDialogFilePicker)
+    
+    With fDialog
+        .AllowMultiSelect = True
+        .Title = "Select the template file to be extracted"
+        .InitialFileName = ".\"
+        .Filters.Clear
+        .Filters.Add "Excel files", "*.xlsx;*.xlsm"
+        .Filters.Add "All files", "*.*"
+    End With
+    'Show the dialog. -1 means success!
+    If fDialog.Show = -1 Then
+       Debug.Print fDialog.SelectedItems(1) 'The full path to the file selected by the user
+    End If
+    Count = 0
+    For Each i In fDialog.SelectedItems
+        SelectExcel.Add Item:=i, Key:=Str(Count)
+        Count = Count + 1
+    Next
+End Function
+
+Sub test()
+    Dim SE As Collection
+    Set SE = SelectExcel()
+    For Each s In SE
+        Debug.Print s
+    Next
+End Sub
