@@ -1,0 +1,101 @@
+Private Declare PtrSafe Function lstrcpy Lib "kernel32" (ByVal lpString1 As Any, ByVal lpString2 As Any) As LongPtr
+Private Declare PtrSafe Function GlobalLock Lib "kernel32" (ByVal hMem As LongPtr) As LongPtr
+Private Declare PtrSafe Function GlobalUnlock Lib "kernel32" (ByVal hMem As LongPtr) As Long
+Private Declare PtrSafe Function OpenClipboard Lib "user32" (ByVal hwnd As LongPtr) As Long
+Private Declare PtrSafe Function CloseClipboard Lib "user32" () As Long
+Private Declare PtrSafe Function GetClipboardData Lib "user32" (ByVal lngFormat As Long) As LongPtr
+Private Declare PtrSafe Function EnumClipboardFormats Lib "user32" (ByVal wFormat As Long) As Long
+Private Declare PtrSafe Function GetClipboardFormatNameA Lib "user32" (ByVal wFormat As Long, ByVal lpString As String, ByVal nMaxCount As Long) As Long
+
+'----------------------------------------------------------------------------------------
+' Reference : https://stackoverflow.com/questions/12117040/can-i-get-the-source-range-of-excel-clipboard-data
+'----------------------------------------------------------------------------------------
+Function fGetClipRange() As Range
+    
+    Dim strGetClipRange As String    'return range
+    Dim lptClipData As LongPtr  'pointer to clipboard data
+    Dim strClipData As String   'clipboard data
+    Dim intOffset As Integer    'for parsing clipboard data
+    Dim lngRangeLink As Long  'clipboard format
+    Const intMaxSize As Integer = 256   'limit for r1c1 to a1 conversion
+    
+    lngRangeLink = fGetFormatId("Link") 'we need the id number for link format
+    
+    If OpenClipboard(0&) = 0 Then GoTo conDone  'could not open clipboard
+    
+    lptClipData = GetClipboardData(lngRangeLink)    'pointer to clipboard data
+    
+    If IsNull(lptClipData) Then GoTo conDone    'could not allocate memory
+    
+    lptClipData = GlobalLock(lptClipData)   'lock clipboard memory so we can reference
+    
+    If IsNull(lptClipData) Then GoTo conDone    'could not lock clipboard memory
+    
+    intOffset = 0   'start parsing data
+    strClipData = Space$(intMaxSize)    'initialize string
+    
+    Call lstrcpy(strClipData, lptClipData + intOffset)  'copy pointer to string
+    
+    If strClipData = Space$(intMaxSize) Then GoTo conDone   'not excel range on clipboard
+    
+    strClipData = Mid(strClipData, 1, InStr(1, strClipData, Chr$(0), 0) - 1)    'trim null character
+    
+    If strClipData <> "Excel" Then GoTo conDone     'not excel range on clipboard
+    
+    intOffset = intOffset + 1 + Len(strClipData)    'can't retrieve string past null character
+    strClipData = Space$(intMaxSize)    'reset string
+    
+    Call lstrcpy(strClipData, lptClipData + intOffset)  'book and sheet next
+    
+    strClipData = Mid(strClipData, 1, InStr(1, strClipData, Chr$(0), 0) - 1)
+    strGetClipRange = "'" & strClipData & "'!"  'get book and sheet
+    intOffset = intOffset + 1 + Len(strClipData)    'next offset
+    strClipData = Space$(intMaxSize)    'initialize string
+    
+    Call lstrcpy(strClipData, lptClipData + intOffset)  'range next
+    
+    strClipData = Mid(strClipData, 1, InStr(1, strClipData, Chr$(0), 0) - 1)
+    strGetClipRange = strGetClipRange & strClipData 'add range
+    strGetClipRange = Application.ConvertFormula(strGetClipRange, xlR1C1, xlA1)
+    
+    Set fGetClipRange = Range(strGetClipRange)  'range needs a1 style
+
+conDone:
+    Call GlobalUnlock(lptClipData)
+    Call CloseClipboard
+
+End Function
+
+Function fGetFormatId(strFormatName As String) As Long
+    
+    Dim lngFormatId As Long
+    Dim strFormatRet As String
+    Dim intLength As Integer
+    
+    If OpenClipboard(0&) = 0 Then Exit Function   'could not open clipboard
+    
+    intLength = Len(strFormatName) + 3  'we only need a couple extra to make sure there isn't more
+    lngFormatId = 0 'start at zero
+    
+    Do
+        strFormatRet = Space(intLength) 'initialize string
+        GetClipboardFormatNameA lngFormatId, strFormatRet, intLength    'get the name for the id
+        strFormatRet = Trim(strFormatRet)   'trim spaces
+        
+        If strFormatRet <> "" Then  'if something is left
+            strFormatRet = Left(strFormatRet, Len(strFormatRet) - 1)    'get rid of terminal character
+            
+            If strFormatRet = strFormatName Then    'if it matches our name
+                fGetFormatId = lngFormatId  'this is the id number
+                Exit Do 'done
+            End If
+        
+        End If
+        
+        lngFormatId = EnumClipboardFormats(lngFormatId) 'get the next used id number
+    
+    Loop Until lngFormatId = 0  'back at zero after last id number
+    
+    Call CloseClipboard 'close clipboard
+
+End Function
