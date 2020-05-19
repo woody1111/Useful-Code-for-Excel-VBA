@@ -1,0 +1,52 @@
+<customUI onLoad="onLoadRibbon" xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+    <commands>
+        <command idMso="Paste" getEnabled="GetEnableMso"/>
+        <command idMso="PasteGallery" getEnabled="GetEnableMso"/>
+        <command idMso="PasteGalleryMini" getEnabled="GetEnableMso"/>
+        <command idMso="PasteMenu" getEnabled="GetEnableMso"/>
+        <command idMso="PasteSpecialDialog" getEnabled="GetEnableMso"/>
+        <command idMso="PasteLink" enabled="false"/>
+        <command idMso="PasteAsHyperlink" enabled="false"/>
+        <command idMso="PasteFormatting" enabled="false"/>
+        <command idMso="PasteFormulasAndNumberFormatting" enabled="false"/>
+        <command idMso="PasteTranspose" enabled="false"/>
+        <command idMso="PastePictureLink" enabled="false"/>
+    </commands>
+    <ribbon startFromScratch="false">
+        <tabs>
+            <tab idMso="TabHome"> 
+                <group idMso="GroupClipboard" getVisible="GetVisibleID"/>	
+            </tab>
+            <tab idMso="TabHome"> 
+                <!-- Add Clipboard group -->
+                <group id="DupClipboard_G" label="Clipboard" insertBeforeMso="GroupClipboard" getVisible="GetVisibleID"> 
+                    <splitButton id="DuplicatePasteMenu" size="large">
+                        <button idMso="PasteValues" imageMso="Paste" label="Paste Values"/>
+                        <menu id="menu">
+                            <button idMso="PasteValues"/> 
+                            <button idMso="PasteFormulas"/> 
+                        </menu>
+                     </splitButton>
+                    <splitButton idMso="CopySplitButton" size="large"/> 
+                    <dialogBoxLauncher>
+                    <button  idMso="ShowClipboard" />           
+                    </dialogBoxLauncher>
+                </group> 
+            </tab>
+        </tabs>
+    </ribbon>
+    <contextMenus>
+      <contextMenu idMso="ContextMenuCell">
+         <gallery idMso="PasteGalleryMini" getVisible="GetVisibleID"/>
+         <gallery idMso="PasteGallery" getVisible="GetVisibleID"/>
+         <button idMso="PasteSpecialDialog" getVisible="GetVisibleID"/>
+         <gallery id="CustomPasteOption_G" label="Paste Option" insertAfterMso="Copy" imageMso="Paste" getVisible="GetVisibleID" showLabel="false" showItemImage="false">
+            <button idMso="PasteValues" />
+            <button idMso="PasteFormulas" />
+         </gallery>
+      </contextMenu>
+      <contextMenu idMso="ContextMenuWorkbookPly">
+        <button idMso="SheetDelete" getEnabled="getEnableCM" getVisible="getVisibleCM" />
+      </contextMenu>
+    </contextMenus>
+</customUI>
