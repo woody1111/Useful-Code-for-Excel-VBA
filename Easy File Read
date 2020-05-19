@@ -1,0 +1,11 @@
+Dim cfg_file As Integer
+Dim text_line As String
+
+cfg_file = FreeFile()
+Open LocalPath & FileName For Input As cfg_file
+
+While Not EOF(cfg_file)
+    Line Input #cfg_file, text_line
+Wend
+
+Close cfg_file
