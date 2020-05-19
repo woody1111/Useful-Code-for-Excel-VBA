@@ -1,0 +1,95 @@
+'--------------------------------------------------------------------------------------------------------
+' Reference : http://www.vbaexpress.com/forum/showthread.php?61781-File-properties-using-FSO-and-Dir
+'--------------------------------------------------------------------------------------------------------
+Public Function GetFileProperty(sFilename As String, sProperty As String) As Variant
+    
+    Dim iProp As Long
+    Dim oFolder As Object
+    Dim oFolderItem As Object
+    Dim iFieldNumber As Long
+    Dim sFolder As String
+    Dim sFile As String
+    
+    GetFileProperty = vbNullString
+    iProp = GetFieldNumber(sProperty)
+    
+    If iProp = -1 Then Exit Function
+    With CreateObject("scripting.FileSystemObject")
+        sFolder = .GetParentFolderName(sFilename)
+        sFile = .GetFileName(sFilename)
+    End With
+    
+    Set oFolder = CreateObject("shell.application").Namespace(sFolder & "\")
+    Set oFolderItem = oFolder.ParseName(sFile)
+    
+    GetFileProperty = oFolder.GetDetailsOf(oFolderItem, iProp)
+    
+End Function
+
+Public Function GetFieldNumber(s) As Long
+    
+    Dim oFolder As Object
+    Dim n As Long
+    Dim sDesktop As Variant
+    
+    sDesktop = CreateObject("wscript.shell").specialfolders(10) & Application.PathSeparator
+    Set oFolder = CreateObject("shell.application").Namespace(sDesktop)
+    
+    On Error GoTo Oops
+    
+    For n = 0 To 999
+        If LCase(s) = LCase(oFolder.GetDetailsOf(oFolder.Items, n)) Then
+            GetFieldNumber = n
+            Exit Function
+        End If
+    Next n
+    
+Oops:
+    
+    Set oFolder = Nothing
+    GetFieldNumber = -1
+     
+End Function
+
+Public Sub GetAllFileProperty(sFilename As String)
+    
+    Dim n As Long
+    Dim count As Integer
+    Dim oFolder As Object
+    Dim oFolderItem As Object
+    Dim ofold As Object
+    Dim iFieldNumber As Long
+    Dim sFolder As String
+    Dim sFile As String
+    Dim Prop As String
+    Dim sDesktop As Variant
+    
+    sDesktop = CreateObject("wscript.shell").specialfolders(10) & Application.PathSeparator
+    Set oFolder = CreateObject("shell.application").Namespace(sDesktop)
+    
+    count = 1
+    
+    For n = 0 To 999
+        
+        Prop = LCase(oFolder.GetDetailsOf(oFolder.Items, n))
+        
+        If Prop <> "" Then
+            
+            ThisWorkbook.Sheets(1).Cells(count, 10) = Prop
+            
+            With CreateObject("scripting.FileSystemObject")
+                sFolder = .GetParentFolderName(sFilename)
+                sFile = .GetFileName(sFilename)
+            End With
+            
+            Set ofold = CreateObject("shell.application").Namespace(sFolder & "\")
+            Set oFolderItem = ofold.ParseName(sFile)
+            
+            ThisWorkbook.Sheets(1).Cells(count, 11) = ofold.GetDetailsOf(oFolderItem, n)
+            count = count + 1
+            
+        End If
+        
+    Next n
+    
+End Sub
