@@ -1,0 +1,50 @@
+Option Explicit
+
+#If VBA7 Then
+    Public Declare PtrSafe Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef Destination As Any, ByRef Source As Any, ByVal Length As Long)
+#Else
+    Public Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (ByRef destination As Any, ByRef source As Any, ByVal length As Long)
+#End If
+
+Public Sub onLoadRibbon(ribbon As IRibbonUI)
+    Set myRibbonUI = ribbon
+End Sub
+
+Public Sub GetEnableMso(control As IRibbonControl, ByRef Enabled)
+  If MyTag Like "*Gen*" Then
+      Enabled = False
+  Else
+      Enabled = True
+  End If
+End Sub
+
+Public Sub GetVisible(control As IRibbonControl, ByRef visible)
+    visible = control.tag Like MyTag
+End Sub
+
+#If VBA7 Then
+Public Function GetRibbon(ByVal lRibbonPointer As LongPtr) As Object
+#Else
+Public Function GetRibbon(ByVal lRibbonPointer As Long) As Object
+#End If
+    Dim objRibbon As Object
+    CopyMemory objRibbon, lRibbonPointer, LenB(lRibbonPointer)
+    Set GetRibbon = objRibbon
+    Set objRibbon = Nothing
+End Function
+
+Public Sub RefreshRibbon(tag As String)
+    GetRibbon2 (.Cells(i, 1).Value)
+    On Error Resume Next
+        myRibbonUI.Invalidate
+        If Err > 0 Then Debug.Print .Cells(i, 1).Value & "Invalidate failed"
+    On Error GoTo 0
+End Sub
+
+#If VBA7 Then
+Public Sub GetRibbon2(ByVal lRibbonPointer As LongPtr)
+#Else
+Public Sub GetRibbon2(ByVal lRibbonPointer As Long)
+#End If
+    CopyMemory myRibbonUI, lRibbonPointer, LenB(lRibbonPointer)
+End Sub
