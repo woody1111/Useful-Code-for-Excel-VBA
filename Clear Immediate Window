@@ -1,0 +1,6 @@
+Public Function Clear()
+  Application.VBE.Windows("Immediate").SetFocus
+  If Application.VBE.ActiveWindow.Caption = "Immediate" And Application.VBE.ActiveWindow.visible Then
+    Application.SendKeys "^a {DEL} {HOME}"
+  End If
+End Function
