@@ -1,0 +1,20 @@
+Public Sub CheckRefScripting()
+    
+    Dim chkref As Object
+    Dim vbProj As Object
+    Dim BoolExists As Boolean
+    Set vbProj = ThisWorkbook.VBProject
+
+    BoolExists = False
+    
+    For Each chkref In vbProj.References
+        If chkref.Name = "Scripting" Then
+            BoolExists = True
+        End If
+    Next
+
+    If Not BoolExists Then
+        ThisWorkbook.VBProject.References.AddFromFile "c:\Windows\System32\scrrun.dll"
+    End If
+    
+End Sub
