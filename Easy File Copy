@@ -1,0 +1,7 @@
+On Error GoTo ErrorHandler
+    With New Scripting.FileSystemObject
+        .CopyFile _
+            sourcepath, _
+            destination
+    End With
+On Error GoTo 0
