@@ -1,0 +1,68 @@
+Private Type POINTAPI
+    X As Long
+    Y As Long
+End Type
+'
+Private Declare PtrSafe Function CreatePopupMenu Lib "user32" () As Long
+Private Declare PtrSafe Function TrackPopupMenuEx Lib "user32" _
+        (ByVal hMenu As Long, ByVal wFlags As Long, ByVal X As Long, ByVal Y As Long, _
+ByVal hWnd As Long, ByVal lptpm As Any) As Long
+Private Declare PtrSafe Function AppendMenu Lib "user32" Alias "AppendMenuA" _
+        (ByVal hMenu As Long, ByVal wFlags As Long, ByVal wIDNewItem As Long, _
+        ByVal lpNewItem As Any) As Long
+Private Declare PtrSafe Function DestroyMenu Lib "user32" (ByVal hMenu As Long) As Long
+Private Declare PtrSafe Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
+Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" _
+        (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+'
+Const MF_CHECKED = &H8&
+Const MF_APPEND = &H100&
+Const TPM_LEFTALIGN = &H0&
+Const MF_SEPARATOR = &H800&
+Const MF_STRING = &H0&
+Const TPM_RETURNCMD = &H100&
+Const TPM_RIGHTBUTTON = &H2&
+'
+Dim hMenu As Long
+Dim hWnd As Long
+'
+Private Sub UserForm_Initialize()
+    hWnd = FindWindow(vbNullString, Me.Caption)
+End Sub
+'
+Private Sub UserForm_MouseUp(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As Single, ByVal Y As Single)
+ Dim Pt As POINTAPI
+    Dim ret As Long
+    If Button = 2 Then
+        hMenu = CreatePopupMenu()
+        AppendMenu hMenu, MF_STRING, 1, "Menu - 1"
+        AppendMenu hMenu, MF_STRING, 2, "Menu - 2"
+        AppendMenu hMenu, MF_SEPARATOR, 3, ByVal 0&
+        AppendMenu hMenu, MF_STRING, 4, "About"
+        GetCursorPos Pt
+        ret = TrackPopupMenuEx(hMenu, TPM_LEFTALIGN Or TPM_RETURNCMD Or _
+                               TPM_RIGHTBUTTON, Pt.X, Pt.Y, hWnd, ByVal 0&)
+        DestroyMenu hMenu
+        
+            Select Case ret
+                Case 1
+                Call MenuProc1
+                Case 2
+                Call MenuProc2
+                Case 4
+                Call MenuProc3
+            End Select
+    End If
+End Sub
+'
+Private Sub MenuProc1()
+    MsgBox "PopUp menu-1 is activated !"
+End Sub
+'
+Private Sub MenuProc2()
+    MsgBox "PopUp menu-2 is activated !"
+End Sub
+'
+Private Sub MenuProc3()
+    MsgBox "Prepared by Raider R"
+End Sub
