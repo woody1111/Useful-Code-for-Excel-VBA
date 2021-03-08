@@ -1,0 +1,93 @@
+Private Sub CommandButton1_Click()
+Me.ListView1.View = lvwReport
+End Sub
+ 
+Private Sub CommandButton4_Click()
+Me.ListView1.View = lvwIcon
+End Sub
+ 
+Private Sub ListView1_ColumnClick(ByVal ColumnHeader As MSComctlLib.ColumnHeader)
+    Debug.Print ColumnHeader
+End Sub
+
+Private Sub ListView1_MouseDown(ByVal Button As Integer, ByVal Shift As Integer, ByVal X As stdole.OLE_XPOS_PIXELS, ByVal Y As stdole.OLE_YPOS_PIXELS)
+    If Button = 2 Then
+        MsgBox "Right Clicked"
+    Else
+        MsgBox "Left "
+        
+    End If
+End Sub
+
+Private Sub UserForm_Initialize()
+    Dim i As Long, j As Long
+    Dim alignConst As Long
+    Dim lvWidth As Long
+    Dim strText As Variant
+    
+    With Me.ImageList1
+        .ImageHeight = 16
+        .ImageWidth = 16
+        .ListImages.Add Picture:=Application.CommandBars.GetImageMso("AddInsMenu", 42, 42)
+        .ListImages.Add Picture:=Application.CommandBars.GetImageMso("CategorizeMenu", 42, 42) 'stdole.LoadPicture("C:\Windows\Installer\{83A02F72-3E62-417C-A115-5FD41CAEF418}\google.ico")
+    End With
+    
+    Dim ColorList As Variant
+    ColorList = Array(&HFFC0FF, &HFF0000, &HFF&, &HFF00&, &H8000&)
+    
+    Dim shp As Shape
+    On Error Resume Next
+    Set shp = Sheet1.Shapes("RegionSq")
+    With shp
+        .Left = 10
+        .Top = 10
+        .Width = 10
+        .Height = 10
+    End With
+    On Error GoTo 0
+    If shp Is Nothing Then
+        Set shp = Sheet1.Shapes.AddShape(msoShapeRectangle, 10, 10, 10, 10)
+        shp.Name = "RegionSq"
+    End If
+    
+    With Me.ImageList2
+        .ImageHeight = 32
+        .ImageWidth = 32
+        For i = 1 To 5
+            shp.Fill.ForeColor.RGB = ColorList(i - 1)
+            shp.CopyPicture xlScreen, xlBitmap
+            .ListImages.Add Picture:=PastePicture(xlBitmap)
+        Next
+    End With
+    
+    Dim ColumnList As Variant
+    ColumnList = Array("Region", "Currency", "XRT", "VAT", "Color")
+    
+    With Me.ListView1
+        .SmallIcons = Me.ImageList1
+        .Icons = Me.ImageList2
+       For i = 1 To 5
+            alignConst = lvwColumnCenter
+            lvWidth = 40
+            If i = 2 Then lvWidth = 50
+            If i = 1 Then alignConst = lvwColumnLeft
+            .ColumnHeaders.Add Text:=ColumnList(i - 1), Width:=lvWidth, Alignment:=alignConst
+        Next
+        
+        Dim temp(0 To 4) As Variant
+        temp(0) = "JPN/JPY/112/0"
+        temp(1) = "KOR/KRW/1200/0.1"
+        temp(2) = "HKG/HKD/7.85/0"
+        temp(3) = "MAC/MOP/7.9974/0"
+        temp(4) = "TWN/TWD/30.112/0.05"
+        
+        For i = 1 To 5
+            strText = Split(temp(i - 1), "/")
+            .ListItems.Add Text:=strText(0), SmallIcon:=1, Icon:=i
+            
+            For j = 1 To 3
+                .ListItems(i).SubItems(j) = strText(j)
+            Next
+        Next
+    End With
+End Sub
