@@ -1,0 +1,46 @@
+'Ref- https://www.ozgrid.com/forum/index.php?thread/54766-get-exclamation-mark-icon-and-sound-for-a-userform/
+
+Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+Private Declare PtrSafe Function ExtractIcon Lib "shell32.dll" Alias "ExtractIconA" (ByVal hInst As Long, ByVal lpszExeFileName As String, ByVal nIconIndex As Long) As Long
+Private Declare PtrSafe Function ExtractAssociatedIcon Lib "shell32.dll" Alias "ExtractAssociatedIconA" (ByVal hInst As Long, ByVal lpIconPath As String, lpiIcon As Long) As Long
+Private Declare PtrSafe Function ExtractIconEx Lib "shell32.dll" Alias "ExtractIconExA" (ByVal lpszFile As String, ByVal nIconIndex As Long, phiconLarge As Long, phiconSmall As Long, ByVal nIcons As Long) As Long
+Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare PtrSafe Function DrawIconEx Lib "user32" (ByVal hdc As Long, ByVal xLeft As Long, ByVal yTop As Long, ByVal hIcon As Long, ByVal cxWidth As Long, ByVal cyWidth As Long, ByVal istepIfAniCur As Long, ByVal hbrFlickerFreeDraw As Long, ByVal diFlags As Long) As Long
+Private Declare PtrSafe Function DestroyIcon Lib "user32" (ByVal hIcon As Long) As Long
+
+''// The drawing flags.
+Private Const DI_MASK = &H1
+Private Const DI_IMAGE = &H2
+Private Const DI_NORMAL = DI_MASK Or DI_IMAGE
+
+Private Sub UserForm_Activate()
+    Dim strDLL_File As String
+    Dim hWnd As Long
+    Dim mIcon As Long
+
+    '// Need to Clear Old Icons!!
+    With Me
+    .Picture = LoadPicture("")
+    .Repaint
+    .Caption = "demo message box icon"
+    End With
+
+    hWnd = FindWindow(vbNullString, Me.Caption)
+
+    strDLL_File = "C:\Program Files\Microsoft Office\root\Office16\1033\OUTLLIBR.DLL" '"C:\windows\system32\comctl32.dll"
+
+    iCount = ExtractIconEx(strDLL_File, -1, 0&, 0&, 1) '"C:\Windows\System32\Shell32.dll"
+    xpos = 10
+    ypos = 10
+    For n = 0 To iCount
+        ExtractIconEx strDLL_File, n, mIcon, 0&, 1&
+        DrawIconEx GetDC(hWnd), xpos, ypos, mIcon, 0, 0, 0, 0, DI_NORMAL
+        DestroyIcon mIcon
+        xpos = xpos + 32
+        If xpos > Me.Width Then
+            xpos = 10
+            ypos = ypos + 32
+        End If
+    Next n
+
+End Sub
